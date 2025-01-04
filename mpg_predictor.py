@@ -1,13 +1,34 @@
+import os
+
 import pandas as pd
 import streamlit as st
 from snowflake.ml._internal.utils import identifier
 from snowflake.ml.registry import Registry
-from snowflake.ml.utils.connection_params import SnowflakeLoginOptions
 from snowflake.snowpark import Session
 
-# Snowflake session configuration
-options = SnowflakeLoginOptions(login_file=".snowsql/config", connection_name="ml")
-sp_session = Session.builder.configs(options).create()
+# Retrieve Snowflake connection parameters from environment variables
+user = os.getenv("SNOWFLAKE_USER")
+password = os.getenv("SNOWFLAKE_PASSWORD")
+account = os.getenv("SNOWFLAKE_ACCOUNT")
+warehouse = os.getenv("SNOWFLAKE_WAREHOUSE")
+database = os.getenv("SNOWFLAKE_DATABASE")
+schema = os.getenv("SNOWFLAKE_SCHEMA")
+
+# If any of the required environment variables are missing, raise an error
+if not all([user, password, account, warehouse, database, schema]):
+    raise ValueError("Missing one or more Snowflake connection environment variables.")
+
+# Set up Snowflake session configuration
+connection_parameters = {
+    "user": user,
+    "password": password,
+    "account": account,
+    "warehouse": warehouse,
+    "database": database,
+    "schema": schema,
+}
+
+sp_session = Session.builder.configs(connection_parameters).create()
 db = identifier._get_unescaped_name(sp_session.get_current_database())
 schema = identifier._get_unescaped_name(sp_session.get_current_schema())
 native_registry = Registry(session=sp_session, database_name=db, schema_name=schema)
