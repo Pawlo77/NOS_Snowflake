@@ -13,9 +13,10 @@ account = os.getenv("SNOWFLAKE_ACCOUNT")
 warehouse = os.getenv("SNOWFLAKE_WAREHOUSE")
 database = os.getenv("SNOWFLAKE_DATABASE")
 schema = os.getenv("SNOWFLAKE_SCHEMA")
+role = os.getenv("SNOWFLAKE_ROLE")
 
 # If any of the required environment variables are missing, raise an error
-if not all([user, password, account, warehouse, database, schema]):
+if not all([user, password, account, warehouse, database, schema, role]):
     raise ValueError("Missing one or more Snowflake connection environment variables.")
 
 # Set up Snowflake session configuration
@@ -26,6 +27,7 @@ connection_parameters = {
     "warehouse": warehouse,
     "database": database,
     "schema": schema,
+    "role": role,
 }
 
 sp_session = Session.builder.configs(connection_parameters).create()
